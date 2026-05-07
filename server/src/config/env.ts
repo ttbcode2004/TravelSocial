@@ -1,0 +1,33 @@
+import "dotenv/config";
+
+export const env = {
+  PORT: process.env.PORT,
+  NODE_ENV: process.env.NODE_ENV,
+
+  DATABASE_URL: process.env.DATABASE_URL,
+
+  COOKIE_SECURE: process.env.COOKIE_SECURE === "true",
+  COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
+  
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+  JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN,
+
+  JWT_EMAIL_SECRET: process.env.JWT_EMAIL_SECRET,
+
+  CLIENT_URL: process.env.CLIENT_URL,
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : undefined,
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
+  EMAIL_FROM: process.env.EMAIL_FROM,
+
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+  GITHUB_CALLBACK_URL: process.env.GITHUB_CALLBACK_URL,
+};
