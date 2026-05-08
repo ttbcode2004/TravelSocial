@@ -10,6 +10,8 @@ import postRoutes from "./routes/post.routes";
 import friendRoutes from "./routes/friend.routes";
 import commentRoutes from "./routes/comment.routes";
 import conversationRoutes from "./routes/conversation.routes";
+import planRoutes from "./routes/plan.routes";
+import locationRoutes from "./routes/location.routes";
 
 const app = express();
 
@@ -41,6 +43,9 @@ app.use("/api/posts", postRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/conversations", conversationRoutes);
+app.use("/api/plans", planRoutes);
+app.use("/api/locations", locationRoutes);
+
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: "Route không tồn tại" });
