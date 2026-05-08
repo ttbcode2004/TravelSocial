@@ -1,14 +1,20 @@
+import http from "http";
 import app from "./app";
 import { env } from "./config/env";
 import { prisma } from "./config/prisma";
+import { setupSocketIO } from "./config/socket";
 
 async function bootstrap() {
-  // Kiểm tra kết nối database
   await prisma.$connect();
   console.log("✅ Kết nối database thành công");
 
-  app.listen(env.PORT, () => {
+  const httpServer = http.createServer(app);
+  const io = setupSocketIO(httpServer);
+  app.set("io", io);
+
+  httpServer.listen(env.PORT, () => {
     console.log(`🚀 Server đang chạy tại http://localhost:${env.PORT}`);
+    console.log(`⚡ WebSocket (Socket.IO) sẵn sàng`);
     console.log(`📌 Môi trường: ${env.NODE_ENV}`);
   });
 }

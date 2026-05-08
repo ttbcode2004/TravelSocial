@@ -8,6 +8,8 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
 import friendRoutes from "./routes/friend.routes";
+import commentRoutes from "./routes/comment.routes";
+import conversationRoutes from "./routes/conversation.routes";
 
 const app = express();
 
@@ -37,6 +39,8 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/friends", friendRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: "Route không tồn tại" });
