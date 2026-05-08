@@ -7,6 +7,7 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 
 import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
+import friendRoutes from "./routes/friend.routes";
 
 const app = express();
 
@@ -35,7 +36,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
-
+app.use("/api/friends", friendRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: "Route không tồn tại" });

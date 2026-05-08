@@ -30,6 +30,7 @@ enum FriendshipStatus {
   ACCEPTED
   DECLINED
   REJECTED
+  BLOCKED
 }
 
 // for Conversation, type can be PRIVATE or GROUP
