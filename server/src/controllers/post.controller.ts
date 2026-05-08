@@ -13,11 +13,6 @@ import {
   CommentIdParam,
 } from "../types/post.type";
 import * as PostsService from "../services/post.service";
-import cloudinary from "../config/cloudinary";
-
-// ─── Param Schemas ────────────────────────────────────────────
-
-// ─── Posts ────────────────────────────────────────────────────
 
 export const createPost = asyncHandler(
   async (req, res) => {
@@ -39,7 +34,6 @@ export const createPost = asyncHandler(
     });
   }
 );
-
 
 export const updatePost = asyncHandler(async (req, res) => {
   const { postId } = PostIdParam.parse(req.params);
@@ -68,11 +62,8 @@ export const getPost = asyncHandler(async (req, res) => {
   res.json({ success: true, data: post });
 });
 
-
 export const deletePost = asyncHandler(async (req, res) => {
   const { postId } = PostIdParam.parse(req.params);
-
-  
 
   const result = await PostsService.deletePost(postId, req.user!.sub);
   res.json({ success: true, ...result });
