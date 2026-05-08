@@ -23,9 +23,9 @@ router.delete("/:postId/reactions", authenticate, PostsController.removeReaction
 router.get("/:postId/reactions", optionalAuthenticate, PostsController.getReactions);
 
 // ─── Comments ─────────────────────────────────────────────────
-router.post("/:postId/comments", authenticate, PostsController.createComment);
+router.post("/comments/:postId", authenticate, PostsController.createComment);
 
-router.get("/:postId/comments", optionalAuthenticate, PostsController.getComments);
+router.get("/comments/:postId", optionalAuthenticate, PostsController.getComments);
 
 // ─── Shares ───────────────────────────────────────────────────
 router.post("/:postId/share", authenticate, PostsController.sharePost);
