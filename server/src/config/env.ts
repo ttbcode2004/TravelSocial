@@ -4,6 +4,8 @@ export const env = {
   PORT: process.env.PORT,
   NODE_ENV: process.env.NODE_ENV,
 
+  CLIENT_URL: process.env.CLIENT_URL,
+
   DATABASE_URL: process.env.DATABASE_URL,
 
   COOKIE_SECURE: process.env.COOKIE_SECURE === "true",
@@ -16,7 +18,6 @@ export const env = {
 
   JWT_EMAIL_SECRET: process.env.JWT_EMAIL_SECRET,
 
-  CLIENT_URL: process.env.CLIENT_URL,
   SMTP_HOST: process.env.SMTP_HOST,
   SMTP_PORT: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : undefined,
   SMTP_USER: process.env.SMTP_USER,
