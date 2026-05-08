@@ -98,6 +98,7 @@ export function setupSocketIO(httpServer: HttpServer): AppIO {
 
     // Auto-join all conversation rooms
     const joinedConvIds = await joinUserConversations(socket);
+    await joinUserPlanRooms(socket);
 
     // Presence: online
     const justCameOnline = PresenceService.userConnected(userId, socket.id);
@@ -279,5 +280,28 @@ function broadcastPresence(
 ) {
   for (const convId of conversationIds) {
     socket.to(`conv:${convId}`).emit(event as any, data);
+  }
+}
+
+async function joinUserPlanRooms(socket: AppSocket): Promise<void> {
+  // Lấy tất cả plans mà user tham gia
+  const [memberships, createdPlans] = await Promise.all([
+    prisma.planMember.findMany({
+      where: { userId: socket.userId },
+      select: { planId: true },
+    }),
+    prisma.plan.findMany({
+      where: { creatorId: socket.userId },
+      select: { id: true },
+    }),
+  ]);
+ 
+  const planIds = new Set([
+    ...memberships.map((m) => m.planId),
+    ...createdPlans.map((p) => p.id),
+  ]);
+ 
+  for (const id of planIds) {
+    socket.join(`plan:${id}`);
   }
 }
