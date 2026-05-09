@@ -1,0 +1,297 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+/* ────────────────────────────────────────────────────────────
+   THEME
+──────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Colors */
+  --color-bg: hsl(220 20% 98%);
+  --color-bg-subtle: hsl(220 16% 96%);
+  --color-bg-muted: hsl(220 14% 93%);
+  --color-bg-elevated: hsl(0 0% 100%);
+
+  --color-fg: hsl(220 25% 10%);
+  --color-fg-muted: hsl(220 12% 40%);
+  --color-fg-subtle: hsl(220 10% 60%);
+
+  --color-border: hsl(220 14% 88%);
+  --color-border-strong: hsl(220 14% 75%);
+
+  --color-primary: hsl(162 72% 36%);
+  --color-primary-fg: hsl(0 0% 100%);
+  --color-primary-hover: hsl(162 72% 30%);
+  --color-primary-subtle: hsl(162 60% 94%);
+
+  --color-accent: hsl(234 89% 62%);
+  --color-accent-fg: hsl(0 0% 100%);
+
+  --color-danger: hsl(0 72% 55%);
+  --color-danger-fg: hsl(0 0% 100%);
+
+  --color-success: hsl(142 70% 38%);
+  --color-success-fg: hsl(0 0% 100%);
+
+  --color-warning: hsl(38 92% 50%);
+  --color-warning-fg: hsl(30 80% 15%);
+
+  /* Fonts */
+  --font-sans: "Geist", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+
+  /* Radius */
+  --radius-card: 1rem;
+
+  /* Shadows */
+  --shadow-card: 0 2px 10px rgb(0 0 0 / 0.06);
+}
+
+/* ────────────────────────────────────────────────────────────
+   DARK MODE
+──────────────────────────────────────────────────────────── */
+
+.dark {
+  --color-bg: hsl(222 24% 9%);
+  --color-bg-subtle: hsl(222 22% 12%);
+  --color-bg-muted: hsl(222 20% 16%);
+  --color-bg-elevated: hsl(222 22% 13%);
+
+  --color-fg: hsl(220 20% 94%);
+  --color-fg-muted: hsl(220 12% 65%);
+  --color-fg-subtle: hsl(220 10% 45%);
+
+  --color-border: hsl(220 16% 20%);
+  --color-border-strong: hsl(220 14% 30%);
+
+  --color-primary: hsl(162 60% 45%);
+  --color-primary-fg: hsl(222 24% 9%);
+  --color-primary-hover: hsl(162 60% 50%);
+  --color-primary-subtle: hsl(162 40% 12%);
+
+  --color-accent: hsl(234 80% 68%);
+}
+
+/* ────────────────────────────────────────────────────────────
+   BASE
+──────────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-bg text-fg font-sans;
+  }
+
+  h1 {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  h3 {
+    @apply text-xl font-medium;
+  }
+
+  h4 {
+    @apply text-base font-medium;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-primary-subtle);
+    color: var(--color-primary);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-fg-subtle);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   COMPONENTS
+──────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* Card */
+  .card {
+    @apply rounded-2xl border border-border bg-bg-elevated shadow-card;
+  }
+
+  /* Input */
+  .input {
+    @apply w-full rounded-xl border border-border bg-bg-muted
+           px-3 py-2 text-sm text-fg
+           placeholder:text-fg-subtle
+           transition-colors duration-150
+           focus:outline-none focus:ring-2 focus:ring-primary/30
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Base Button */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl text-sm font-medium
+           transition-all duration-150
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl bg-primary px-4 py-2
+           text-sm font-medium text-primary-fg
+           transition-all duration-150
+           hover:bg-primary-hover;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl border border-border
+           bg-bg-muted px-4 py-2
+           text-sm font-medium text-fg
+           transition-all duration-150
+           hover:bg-bg-subtle;
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl px-3 py-2
+           text-sm font-medium text-fg-muted
+           transition-all duration-150
+           hover:bg-bg-muted hover:text-fg;
+  }
+
+  /* Danger Button */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-xl bg-danger px-4 py-2
+           text-sm font-medium text-danger-fg
+           transition-all duration-150
+           hover:opacity-90;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1
+           rounded-full px-2 py-0.5
+           text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply inline-flex items-center gap-1
+           rounded-full bg-primary-subtle
+           px-2 py-0.5 text-xs font-medium text-primary;
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center gap-1
+           rounded-full bg-danger/10
+           px-2 py-0.5 text-xs font-medium text-danger;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center gap-1
+           rounded-full bg-success/10
+           px-2 py-0.5 text-xs font-medium text-success;
+  }
+
+  /* Avatar */
+  .avatar {
+    @apply rounded-full object-cover;
+  }
+
+  /* Divider */
+  .divider {
+    @apply my-4 border-t border-border;
+  }
+
+  /* Skeleton */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-bg-muted;
+  }
+
+  /* Navigation */
+  .nav-item {
+    @apply flex cursor-pointer items-center gap-3
+           rounded-xl px-3 py-2.5
+           text-fg-muted transition-all duration-150
+           hover:bg-bg-muted hover:text-fg;
+  }
+
+  .nav-item.active {
+    @apply bg-primary-subtle font-medium text-primary;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   UTILITIES
+──────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .glass {
+    backdrop-filter: blur(12px) saturate(1.5);
+    background: rgb(255 255 255 / 0.7);
+  }
+
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
