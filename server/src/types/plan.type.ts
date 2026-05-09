@@ -7,9 +7,9 @@ import {
   ExpenseCategory,
 } from "../generated/prisma/client";
 
-// ─── Plan ─────────────────────────────────────────────────────
+// ─── Base Plan Schema ────────────────────────────────────────
 
-export const CreatePlanSchema = z.object({
+const BasePlanSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(2000).optional(),
   startDate: z.iso.date("Định dạng ngày: YYYY-MM-DD").optional(),
@@ -17,16 +17,23 @@ export const CreatePlanSchema = z.object({
   totalBudget: z.coerce.number().positive().optional(),
   currency: z.string().length(3).default("VND"),
   coverImage: z.string().pipe(z.url()).optional(),
-}).refine(
+});
+
+// ─── Plan ────────────────────────────────────────────────────
+
+export const CreatePlanSchema = BasePlanSchema.refine(
   (d) => !d.startDate || !d.endDate || d.startDate <= d.endDate,
-  { message: "Ngày kết thúc phải sau ngày bắt đầu", path: ["endDate"] }
+  {
+    message: "Ngày kết thúc phải sau ngày bắt đầu",
+    path: ["endDate"],
+  }
 );
 
-export const UpdatePlanSchema = CreatePlanSchema.partial().extend({
+export const UpdatePlanSchema = BasePlanSchema.partial().extend({
   status: z.enum(PlanStatus).optional(),
 });
 
-// ─── Members ──────────────────────────────────────────────────
+// ─── Members ─────────────────────────────────────────────────
 
 export const InviteMembersSchema = z.object({
   userIds: z.array(z.string().pipe(z.uuid())).min(1).max(50),
@@ -37,7 +44,7 @@ export const UpdateMemberRoleSchema = z.object({
   role: z.enum(PlanMemberRole),
 });
 
-// ─── Tasks ────────────────────────────────────────────────────
+// ─── Tasks ───────────────────────────────────────────────────
 
 export const CreateTaskSchema = z.object({
   title: z.string().min(1).max(300),
@@ -51,7 +58,7 @@ export const UpdateTaskSchema = CreateTaskSchema.partial().extend({
   status: z.enum(TaskStatus).optional(),
 });
 
-// ─── Expenses ─────────────────────────────────────────────────
+// ─── Expenses ────────────────────────────────────────────────
 
 export const CreateExpenseSchema = z.object({
   title: z.string().min(1).max(300),
@@ -65,7 +72,7 @@ export const CreateExpenseSchema = z.object({
 
 export const UpdateExpenseSchema = CreateExpenseSchema.partial();
 
-// ─── Plan Messages ────────────────────────────────────────────
+// ─── Plan Messages ───────────────────────────────────────────
 
 export const SendPlanMessageSchema = z.object({
   content: z.string().max(3000).optional(),
@@ -74,7 +81,7 @@ export const SendPlanMessageSchema = z.object({
   message: "Tin nhắn phải có nội dung hoặc media",
 });
 
-// ─── Pagination ───────────────────────────────────────────────
+// ─── Pagination ──────────────────────────────────────────────
 
 export const CursorPageSchema = z.object({
   cursor: z.string().optional(),
@@ -111,7 +118,7 @@ export const ExpenseIdParam = z.object({
   expenseId: z.string().pipe(z.uuid()),
 });
 
-// ─── Inferred types ───────────────────────────────────────────
+// ─── Inferred types ──────────────────────────────────────────
 
 export type CreatePlanDto       = z.infer<typeof CreatePlanSchema>;
 export type UpdatePlanDto       = z.infer<typeof UpdatePlanSchema>;
