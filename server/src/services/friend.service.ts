@@ -2,6 +2,10 @@ import { FriendshipStatus, Prisma } from "../generated/prisma/client";
 import { prisma } from "../config/prisma";
 import { badRequest, conflict, forbidden, notFound } from "../utils/errors";
 import type { CursorPageDto, FriendshipStatusView, SearchDto } from "../types/friend.type";
+import {
+  notifyFriendRequest,
+  notifyFriendAccepted,
+} from "../triggers/notification.trigger";
 
 // ─── Selector ─────────────────────────────────────────────────
 
@@ -84,6 +88,8 @@ export async function sendRequest(requesterId: string, addresseeId: string) {
     include: { addressee: { select: userPreview } },
   });
 
+  notifyFriendRequest(requesterId, addresseeId, friendship.id).catch(() => {});
+
   return {
     message: `Đã gửi lời mời kết bạn đến ${addressee.username}`,
     friendship,
@@ -109,6 +115,8 @@ export async function acceptRequest(userId: string, friendshipId: string) {
     data: { status: "ACCEPTED" },
     include: { requester: { select: userPreview } },
   });
+
+  notifyFriendAccepted(userId, friendship.requesterId, friendshipId).catch(() => {});
 
   return {
     message: `Đã chấp nhận lời mời kết bạn từ ${updated.requester.username}`,
