@@ -12,6 +12,13 @@ import type {
 } from "../types/post.type";
 import  {syncPostMedias, uploadMedias}  from "./cloudinary.service";
 
+import {
+  notifyReaction,
+  notifyComment,
+  notifyCommentReply,
+  notifyPostShare,
+} from "../triggers/notification.trigger";
+
 // ─── Selector chung cho Post ──────────────────────────────────
 // Dùng lại nhiều nơi, tránh over-fetch
 // Khi query User
@@ -271,6 +278,9 @@ export async function upsertReaction(
 
   // Trả về tổng số reaction
   const counts = await getReactionCounts(postId);
+
+  notifyReaction(userId, post.userId, postId, dto.type).catch(() => {});
+
   return { reaction, counts };
 }
 
@@ -375,6 +385,21 @@ export async function createComment(
     select: commentSelect,
   });
 
+  // Notify post owner
+  notifyComment(userId, post.userId, postId, comment.id, dto.content).catch(() => {});
+ 
+  // Notify parent comment owner if it's a reply
+  if (dto.parentId) {
+    const parent = await prisma.comment.findUnique({
+      where: { id: dto.parentId },
+      select: { userId: true },
+    });
+    if (parent && parent.userId !== userId) {
+      notifyCommentReply(userId, parent.userId, postId, comment.id, dto.content).catch(() => {});
+    }
+  }
+ 
+
   return comment;
 }
 
@@ -472,5 +497,10 @@ export async function sharePost(postId: string, userId: string, note?: string) {
     data: { postId, userId, note: note ?? null },
     select: { id: true, note: true, createdAt: true },
   });
+
+  if (!existing) {
+    notifyPostShare(userId, post.userId, postId).catch(() => {});
+  }
+  
   return { share, isNew: true };
 }
