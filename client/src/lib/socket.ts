@@ -1,10 +1,11 @@
+// lib/socket.ts
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io("/", {
+    socket = io(import.meta.env.VITE_API_URL, {
       withCredentials: true,
       transports: ["websocket", "polling"],
       autoConnect: false,
@@ -20,25 +21,30 @@ export function connectSocket() {
 }
 
 export function disconnectSocket() {
-  socket?.disconnect();
-  socket = null;
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 }
 
-// ─── Typed event helpers ──────────────────────────────────────
-
-export function onSocket<T>(event: string, cb: (data: T) => void) {
-  getSocket().on(event, cb);
-  return () => getSocket().off(event, cb);
-}
-
-export function emitSocket<T>(
+export function onSocket<T>(
   event: string,
-  data: object,
-  cb?: (res: T) => void
+  callback: (data: T) => void
+): () => void {
+  const s = getSocket();
+  s.on(event, callback);
+  return () => s.off(event, callback);
+}
+
+export function emitSocket<T = any>(
+  event: string,
+  data?: object,
+  ack?: (res: T) => void
 ) {
-  if (cb) {
-    getSocket().emit(event, data, cb);
+  const s = getSocket();
+  if (ack) {
+    s.emit(event, data, ack);
   } else {
-    getSocket().emit(event, data);
+    s.emit(event, data);
   }
 }

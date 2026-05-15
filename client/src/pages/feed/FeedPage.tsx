@@ -1,35 +1,34 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { api } from "../../lib/api";
+// src/pages/feed/FeedPage.tsx
+import { useEffect } from "react";
+import { Newspaper } from "lucide-react";
+
+import { usePostStore } from "../../stores/post.store";
+
 import { SkeletonPost, EmptyState } from "../../components/ui/Avatar";
 import PostCard from "../../components/post/PostCard";
 import CreatePost from "../../components/post/CreatePost";
-import { Newspaper } from "lucide-react";
-import type { Post, CursorPage } from "../../types";
 
 export default function FeedPage() {
-  const {
-    data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading,
-  } = useInfiniteQuery({
-    queryKey: ["feed"],
-    queryFn: async ({ pageParam }) => {
-      const res = await api.get<{ items: Post[]; nextCursor: string | null; hasNextPage: boolean }>(
-        "/posts/feed",
-        { params: { cursor: pageParam, limit: 20 } }
-      );
-      return res.data;
-    },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (last) => last.nextCursor ?? undefined,
-  });
+  const feed = usePostStore((s) => s.feed);
+  const getFeed = usePostStore((s) => s.getFeed);
+  const isLoading = usePostStore((s) => s.isLoading);
 
-  const posts = data?.pages.flatMap((p) => p.items) ?? [];
+  useEffect(() => {
+    if (!feed) {
+      getFeed();
+    }
+  }, []);
+
+  const posts = feed?.items ?? [];
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
       <CreatePost />
 
       {isLoading ? (
-        Array.from({ length: 3 }).map((_, i) => <SkeletonPost key={i} />)
+        Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonPost key={i} />
+        ))
       ) : posts.length === 0 ? (
         <EmptyState
           icon={<Newspaper size={40} />}
@@ -38,16 +37,17 @@ export default function FeedPage() {
         />
       ) : (
         <>
-          {posts.map((post) => <PostCard key={post.id} post={post} />)}
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
 
-          {hasNextPage && (
+          {feed?.hasNextPage && (
             <div className="flex justify-center pt-2">
               <button
                 className="btn-secondary"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
+                onClick={() => getFeed(feed.nextCursor ?? undefined)}
               >
-                {isFetchingNextPage ? "Đang tải..." : "Xem thêm"}
+                Xem thêm
               </button>
             </div>
           )}

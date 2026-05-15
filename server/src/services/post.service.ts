@@ -176,7 +176,6 @@ export async function updatePost(
   return formatPost(updated, userId);
 }
 
-
 export async function getPostById(postId: string, viewerId?: string) {
   const visibilityFilter = await buildVisibilityFilter(viewerId);
 
@@ -343,14 +342,41 @@ export async function getReactionUsers(
 
 // ─── COMMENTS ────────────────────────────────────────────────
 
+const replySelect = {
+  id: true,
+  content: true,
+  parentId: true,
+  createdAt: true,
+  updatedAt: true,
+  user: {
+    select: postAuthorSelect,
+  },
+} satisfies Prisma.CommentSelect;
+
 const commentSelect = {
   id: true,
   content: true,
   parentId: true,
   createdAt: true,
   updatedAt: true,
-  user: { select: postAuthorSelect },
-  _count: { select: { replies: true } },
+
+  user: {
+    select: postAuthorSelect,
+  },
+
+  replies: {
+    orderBy: {
+      createdAt: "asc",
+    },
+
+    select: replySelect,
+  },
+
+  _count: {
+    select: {
+      replies: true,
+    },
+  },
 } satisfies Prisma.CommentSelect;
 
 export async function createComment(

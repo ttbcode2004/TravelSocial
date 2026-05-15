@@ -12,9 +12,12 @@ import commentRoutes from "./routes/comment.routes";
 import conversationRoutes from "./routes/conversation.routes";
 import planRoutes from "./routes/plan.routes";
 import locationRoutes from "./routes/location.routes";
-import notificationRoutes from "./routes/notfication.routes";
+import notificationRoutes from "./routes/notification.routes";
+import userRoutes from "./routes/user.routes";
 
 const app = express();
+
+app.disable("etag");
 
 // MIDDLEWARES
 app.use(cors({
@@ -47,6 +50,7 @@ app.use("/api/conversations", conversationRoutes);
 app.use("/api/plans", planRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/users", userRoutes);
 
 
 app.use((_req, res) => {

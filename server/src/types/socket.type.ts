@@ -10,12 +10,12 @@ export interface UserPreview {
 }
 
 // ─── Message ──────────────────────────────────
-
+// object message realtime
 export interface MessagePayload {
   id: string;
   conversationId: string;
   content: string | null;
-  mediaUrl: string | null;
+  mediaUrl?: string | null;
   type: MessageType;
   isDeleted: boolean;
   createdAt: string;
@@ -23,11 +23,21 @@ export interface MessagePayload {
 }
 
 // ─── Callback (FIX CỨNG TYPE SOCKET.IO) ───────
+// là callback acknowledgement 
+// Socket.IO hỗ trợ: socket.emit("event", data, callback)
+// frontend: 
+// socket.emit("message:send", data, (res) => {
+//   console.log(res)
+// })
+// backend:
+// socket.on("message:send", (data, cb) => {
+//    cb({ success: true })
+// })
 
 export type Ack<T = any> = (res: T) => void;
 
 // ─── Client → Server ─────────────────────────
-
+// Frontend được phép emit gì.
 export interface ClientToServerEvents {
   "message:send": (
     data: {

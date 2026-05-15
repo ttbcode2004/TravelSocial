@@ -118,20 +118,20 @@ function NotifRow({ n }: { n: Notification }) {
 
 export default function NotificationsPage() {
   const {
-    notifications, isLoading, nextCursor, hasNextPage,
-    fetchNotifications, markAllAsRead, clearAll, unreadCount,
-  } = useNotificationStore((s) => ({
-    notifications:    s.notifications,
-    isLoading:        s.isLoading,
-    nextCursor:       s.nextCursor,
-    hasNextPage:      !!s.nextCursor,
-    fetchNotifications: s.fetchNotifications,
-    markAllAsRead:    s.markAllAsRead,
-    clearAll:         s.clearAll,
-    unreadCount:      s.unreadCount,
-  }));
+    notifications,
+    isLoading,
+    nextCursor,
+    fetchNotifications,
+    markAllAsRead,
+    clearAll,
+    unreadCount,
+  } = useNotificationStore();
 
-  useEffect(() => { fetchNotifications(true); }, []);
+  const hasNextPage = !!nextCursor;
+
+  useEffect(() => {
+    fetchNotifications(true);
+  }, [fetchNotifications]);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">

@@ -8,13 +8,12 @@ interface TypingUser { userId: string; username: string; }
 interface ConversationStore {
   conversations: Conversation[];
   activeConversationId: string | null;
-  messages: Record<string, Message[]>;         // conversationId → messages
-  nextCursor: Record<string, string | null>;   // conversationId → cursor
-  typing: Record<string, TypingUser[]>;        // conversationId → who's typing
+  messages: Record<string, Message[]>;
+  nextCursor: Record<string, string | null>;
+  typing: Record<string, TypingUser[]>;
   unreadTotal: number;
   isLoadingMessages: boolean;
 
-  // Actions
   fetchConversations: () => Promise<void>;
   openConversation: (id: string) => void;
   fetchMessages: (conversationId: string, reset?: boolean) => Promise<void>;
@@ -25,10 +24,16 @@ interface ConversationStore {
   stopTyping: (conversationId: string) => void;
   createPrivateConversation: (targetUserId: string) => Promise<Conversation>;
   fetchUnreadCount: () => Promise<void>;
-
-  // Socket
   initSocketListeners: () => () => void;
 }
+
+// ─── Stable empty references ──────────────────────────────────
+// NEVER use [] or {} inline inside selectors — creates new reference every render
+
+const EMPTY_MESSAGES: Message[] = [];
+const EMPTY_TYPING:   TypingUser[] = [];
+
+// ─── Store ────────────────────────────────────────────────────
 
 export const useConversationStore = create<ConversationStore>((set, get) => ({
   conversations: [],
@@ -41,10 +46,12 @@ export const useConversationStore = create<ConversationStore>((set, get) => ({
 
   fetchConversations: async () => {
     const res = await api.get("/conversations");
-    set({ conversations: res.data.items });
+    set({ conversations: res.data.items ?? [] });
   },
 
   openConversation: (id) => {
+    // Guard: skip if already active — prevents cascading setState
+    if (get().activeConversationId === id) return;
     set({ activeConversationId: id });
     get().fetchMessages(id, true);
     get().markAsRead(id);
@@ -111,101 +118,99 @@ export const useConversationStore = create<ConversationStore>((set, get) => ({
 
   fetchUnreadCount: async () => {
     const res = await api.get("/conversations/unread");
-    set({ unreadTotal: res.data.data.total });
+    set({ unreadTotal: res.data.data?.total ?? 0 });
   },
 
   initSocketListeners: () => {
-    // New message
     const offNew = onSocket<{ conversationId: string; message: Message }>(
       "message:new",
       ({ conversationId, message }) => {
         set((state) => {
-          const existing = state.messages[conversationId] ?? [];
-          const isDup = existing.some((m) => m.id === message.id);
-          const updatedMessages = isDup
-            ? existing
-            : [...existing, message];
+          const existing = state.messages[conversationId];
+          const isDup = existing?.some((m) => m.id === message.id) ?? false;
 
-          // Update lastMessage in conversation list
+          // Always update conversation list with latest message
           const updatedConvs = state.conversations.map((c) =>
             c.id === conversationId ? { ...c, lastMessage: message } : c
           );
-
-          // Sort conversations by last message
           updatedConvs.sort((a, b) => {
             const at = a.lastMessage?.createdAt ?? a.createdAt;
             const bt = b.lastMessage?.createdAt ?? b.createdAt;
             return new Date(bt).getTime() - new Date(at).getTime();
           });
 
+          if (isDup) return { conversations: updatedConvs };
+
           return {
-            messages: { ...state.messages, [conversationId]: updatedMessages },
             conversations: updatedConvs,
-          };
-        });
-      }
-    );
-
-    // Message deleted
-    const offDeleted = onSocket<{ conversationId: string; messageId: string; message: Message }>(
-      "message:deleted",
-      ({ conversationId, message }) => {
-        set((state) => ({
-          messages: {
-            ...state.messages,
-            [conversationId]: (state.messages[conversationId] ?? []).map((m) =>
-              m.id === message.id ? message : m
-            ),
-          },
-        }));
-      }
-    );
-
-    // Typing start
-    const offTypingStart = onSocket<{ conversationId: string; userId: string; username: string }>(
-      "typing:start",
-      ({ conversationId, userId, username }) => {
-        set((state) => {
-          const current = state.typing[conversationId] ?? [];
-          const exists = current.some((u) => u.userId === userId);
-          return {
-            typing: {
-              ...state.typing,
-              [conversationId]: exists
-                ? current
-                : [...current, { userId, username }],
+            messages: {
+              ...state.messages,
+              [conversationId]: existing ? [...existing, message] : [message],
             },
           };
         });
       }
     );
 
-    // Typing stop
-    const offTypingStop = onSocket<{ conversationId: string; userId: string }>(
-      "typing:stop",
-      ({ conversationId, userId }) => {
-        set((state) => ({
-          typing: {
-            ...state.typing,
-            [conversationId]: (state.typing[conversationId] ?? []).filter(
-              (u) => u.userId !== userId
-            ),
-          },
-        }));
+    const offDeleted = onSocket<{ conversationId: string; messageId: string; message: Message }>(
+      "message:deleted",
+      ({ conversationId, message }) => {
+        set((state) => {
+          const existing = state.messages[conversationId];
+          if (!existing) return {};
+          return {
+            messages: {
+              ...state.messages,
+              [conversationId]: existing.map((m) => m.id === message.id ? message : m),
+            },
+          };
+        });
       }
     );
 
-    return () => {
-      offNew(); offDeleted(); offTypingStart(); offTypingStop();
-    };
+    const offTypingStart = onSocket<{ conversationId: string; userId: string; username: string }>(
+      "typing:start",
+      ({ conversationId, userId, username }) => {
+        set((state) => {
+          const current = state.typing[conversationId];
+          if (current?.some((u) => u.userId === userId)) return {};
+          return {
+            typing: {
+              ...state.typing,
+              [conversationId]: current
+                ? [...current, { userId, username }]
+                : [{ userId, username }],
+            },
+          };
+        });
+      }
+    );
+
+    const offTypingStop = onSocket<{ conversationId: string; userId: string }>(
+      "typing:stop",
+      ({ conversationId, userId }) => {
+        set((state) => {
+          const current = state.typing[conversationId];
+          if (!current) return {};
+          const next = current.filter((u) => u.userId !== userId);
+          if (next.length === current.length) return {}; // no change
+          return { typing: { ...state.typing, [conversationId]: next } };
+        });
+      }
+    );
+
+    return () => { offNew(); offDeleted(); offTypingStart(); offTypingStop(); };
   },
 }));
 
-// Selectors
+// ─── Stable selectors ─────────────────────────────────────────
+// Return the SAME empty reference when key not found → no re-render
+
 export const useActiveMessages = () =>
-  useConversationStore((s) =>
-    s.activeConversationId ? (s.messages[s.activeConversationId] ?? []) : []
-  );
+  useConversationStore((s) => {
+    if (!s.activeConversationId) return EMPTY_MESSAGES;
+    return s.messages[s.activeConversationId] ?? EMPTY_MESSAGES;
+  });
 
 export const useTypingUsers = (conversationId: string) =>
-  useConversationStore((s) => s.typing[conversationId] ?? []);
+  useConversationStore((s) => s.typing[conversationId] ?? EMPTY_TYPING);
