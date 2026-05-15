@@ -1,7 +1,8 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { useAuthStore } from "../stores/auth.store";
 
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   withCredentials: true,   // send cookies
   headers: { "Content-Type": "application/json" },
 });
@@ -19,11 +20,15 @@ api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryAxiosRequestConfig;
+    const isAuthRoute =
+      originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url?.includes("/auth/register") ||
+      originalRequest.url?.includes("/auth/refresh");
 
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes("/auth/refresh")
+      !isAuthRoute
     ) {
       if (isRefreshing) {
         return new Promise((resolve) => {
@@ -36,14 +41,17 @@ api.interceptors.response.use(
 
       try {
         await api.post("/auth/refresh");
+
         refreshQueue.forEach((cb) => cb());
         refreshQueue = [];
+
         return api(originalRequest);
-      } catch {
+      } catch (err) {
         refreshQueue = [];
-        // Redirect to login
-        window.location.href = "/login";
-        return Promise.reject(error);
+
+        useAuthStore.getState().logout();
+
+        return Promise.reject(err);
       } finally {
         isRefreshing = false;
       }

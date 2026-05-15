@@ -10,7 +10,7 @@ const router = Router();
 router.get("/feed", authenticate, PostsController.getFeed);
 
 // ─── Posts CRUD ───────────────────────────────────────────────
-router.post("/", authenticate,upload.array("media", 10), PostsController.createPost);
+router.post("/", authenticate,upload.array("mediaUrls", 10), PostsController.createPost);
 
 router.get("/user/:userId", optionalAuthenticate, PostsController.getUserPosts);
 router.get("/:postId", optionalAuthenticate, PostsController.getPost);

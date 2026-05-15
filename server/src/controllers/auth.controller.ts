@@ -69,13 +69,13 @@ export const refresh = asyncHandler(async (req, res) => {
 export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = ForgotPasswordSchema.parse(req.body);
   const result = await AuthService.forgotPassword(email);
-  res.json({ success: true, ...result });
+  res.json({ ...result });
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {
   const dto = ResetPasswordSchema.parse(req.body);
   const result = await AuthService.resetPassword(dto);
-  res.json({ success: true, ...result });
+  res.json({ ...result });
 });
 
 export const changePassword = asyncHandler(async (req: Request, res: Response) => {

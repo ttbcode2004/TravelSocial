@@ -12,6 +12,22 @@ import type {
 } from "../types/socket.type";
 import { MessageType } from "../generated/prisma/client";
 
+// Frontend React
+//     ↓ socket.emit()
+// Socket.IO Server
+//     ↓ gọi service
+// Conversation Service
+//     ↓ Prisma
+// Database
+
+// Sau đó:
+
+// Database
+//     ↓
+// Socket.IO emit realtime
+//     ↓
+// Frontend tất cả users update ngay
+
 // ─── Typed Socket ─────────────────────────────────────────────
 
 type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents> & {
@@ -110,12 +126,12 @@ export function setupSocketIO(httpServer: HttpServer): AppIO {
 
     socket.on("message:send", async (data, callback) => {
       try {
-        const { conversationId, content, mediaUrl, type = MessageType.TEXT } = data;
+        const { conversationId, content, mediaUrl = "", type = MessageType.TEXT } = data;
 
         if (!conversationId) {
           return callback({ success: false, error: "Thiếu conversationId" });
         }
-        if (!content && !mediaUrl) {
+        if (!content) {
           return callback({ success: false, error: "Tin nhắn trống" });
         }
 

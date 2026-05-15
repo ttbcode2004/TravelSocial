@@ -3,7 +3,6 @@
 export type Visibility       = "PUBLIC" | "FRIENDS" | "PRIVATE";
 export type ReactionType     = "LIKE" | "LOVE" | "HAHA" | "WOW" | "SAD" | "ANGRY";
 export type FriendshipStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
-export type FriendshipView   = "NONE" | "PENDING_SENT" | "PENDING_RECEIVED" | "ACCEPTED" | "BLOCKED" | "BLOCKED_BY";
 export type MessageType      = "TEXT" | "IMAGE" | "VIDEO" | "FILE" | "LOCATION";
 export type ConversationType = "PRIVATE" | "GROUP";
 export type MemberRole       = "ADMIN" | "MEMBER";
@@ -20,9 +19,41 @@ export type NotificationType =
   | "PLAN_INVITE" | "PLAN_UPDATE" | "TASK_ASSIGNED" | "TASK_DONE"
   | "LOCATION_SAVED";
 
+// ─── Friendship Types ─────────────────────────────────────────
+
+/** Trạng thái quan hệ bạn bè từ góc nhìn của người xem */
+export type FriendshipStatusView =
+  | "NONE"
+  | "PENDING_SENT"
+  | "PENDING_RECEIVED"
+  | "ACCEPTED"
+  | "BLOCKED"
+  | "BLOCKED_BY";
+
+// ─── DTOs ─────────────────────────────────────────────────────
+
+export interface CursorPageDto {
+  cursor?: string;
+  limit?: number;
+}
+
+export interface SearchDto {
+  q?: string;
+  cursor?: string;
+  limit?: number;
+}
+
+export interface UserIdDto {
+  userId: string;
+}
+
+export interface FriendshipIdDto {
+  friendshipId: string;
+}
 // ─── User ─────────────────────────────────────────────────────
 
 export interface User {
+  sub: string;
   id: string;
   username: string;
   email: string;
@@ -48,6 +79,16 @@ export interface AuthState {
   isLoading: boolean;
 }
 
+// ─── Friendship Response ──────────────────────────────────────
+
+export interface Friendship {
+  id: string;
+  status: FriendshipStatus;
+  createdAt: string;
+  requester?: UserPreview;
+  addressee?: UserPreview;
+}
+
 // ─── Post ─────────────────────────────────────────────────────
 
 export interface Post {
@@ -64,12 +105,42 @@ export interface Post {
 
 export interface Comment {
   id: string;
+
   content: string;
+
   parentId: string | null;
+
   createdAt: string;
+
   updatedAt: string;
-  user: UserPreview;
-  _count: { replies: number };
+
+  user: User;
+
+  replies?: Comment[];
+
+  _count?: {
+    replies: number;
+  };
+}
+
+export interface PlanMessage {
+  id: string;
+
+  content?: string;
+
+  mediaUrl?: string;
+
+  createdAt: string;
+
+  updatedAt: string;
+
+  user: {
+    id: string;
+
+    username: string;
+
+    avatarUrl?: string | null;
+  };
 }
 
 // ─── Friendship ───────────────────────────────────────────────
@@ -80,6 +151,26 @@ export interface Friendship {
   createdAt: string;
   requester?: UserPreview;
   addressee?: UserPreview;
+}
+
+export interface FriendUser extends UserPreview {
+  mutualFriendsCount?: number;
+}
+
+// ─── Pagination ───────────────────────────────────────────────
+
+export interface CursorPage<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+  total?: number;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  code?: string;
 }
 
 // ─── Conversation & Message ───────────────────────────────────

@@ -3,12 +3,16 @@ import { lazy, Suspense } from "react";
 import { useAuthStore } from "../stores/auth.store";
 import AppLayout from "../components/layout/AppLayout";
 import AuthLayout from "../components/layout/AuthLayout";
-import {Spinner} from "../components/ui/Avatar";
+import {PageLoader} from "../components/ui/Avatar";
+import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
+import { ForgotPasswordPage, ResetPasswordPage } from "../pages/auth/PasswordPage";
+import SettingsPage from "../pages/settings/SettingPage";
 
 // Lazy load pages
 const LoginPage          = lazy(() => import("../pages/auth/LoginPage"));
 const RegisterPage       = lazy(() => import("../pages/auth/RegisterPage"));
 const FeedPage           = lazy(() => import("../pages/feed/FeedPage"));
+const PostDetailsPage    = lazy(() => import("../pages/feed/PostDetailsPage"));
 const ProfilePage        = lazy(() => import("../pages/profile/ProfilePage"));
 const ChatPage           = lazy(() => import("../pages/chat/ChatPage"));
 const MapPage            = lazy(() => import("../pages/map/MapPage"));
@@ -17,14 +21,6 @@ const PlanDetailPage     = lazy(() => import("../pages/plans/PlanDetailPage"));
 const NotificationsPage  = lazy(() => import("../pages/notifications/NotificationsPage"));
 const FriendsPage        = lazy(() => import("../pages/friends/FriendsPage"));
 
-// ─── Auth guard ───────────────────────────────────────────────
-function PageLoader() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Spinner className="w-8 h-8 text-primary" />
-    </div>
-  );
-}
 
 function RequireAuth() {
   const { user, isInitialized, isLoading } = useAuthStore();
@@ -65,6 +61,19 @@ export const router = createBrowserRouter([
             path: "/register",
             element: <RegisterPage />,
           },
+          {
+            path: "/auth/verify-email",
+            element: <VerifyEmailPage />,
+          },
+          {
+            path: "/forgot-password",
+            element: <ForgotPasswordPage />,
+          },
+          {
+            path: "/auth/reset-password",
+            element: <ResetPasswordPage />,
+          },
+
         ],
       },
     ],
@@ -91,6 +100,10 @@ export const router = createBrowserRouter([
           {
             path: "/feed",
             element: <FeedPage />,
+          },
+          {
+            path: "feed/:id",
+            element: <PostDetailsPage />,
           },
 
           {
@@ -131,6 +144,10 @@ export const router = createBrowserRouter([
           {
             path: "/notifications",
             element: <NotificationsPage />,
+          },
+          {
+            path: "/settings",
+            element: <SettingsPage />,
           },
         ],
       },

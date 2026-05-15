@@ -154,6 +154,7 @@ export async function forgotPassword(email: string) {
 
   if (!user) {
     return {
+      success: false,
       message: "Không tìm thấy tài khoản với email này. Vui lòng kiểm tra lại hoặc đăng ký mới.",
     };
   }
@@ -161,7 +162,7 @@ export async function forgotPassword(email: string) {
   const token = signEmailToken({ sub: user.id, email: user.email, type: "password_reset" });
   await sendPasswordResetEmail(user.email, user.username, token);
 
-  return { message: "Nếu email tồn tại, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu." };
+  return { success: true, message: "Nếu email tồn tại, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu." };
 }
 
 export async function resetPassword(dto: ResetPasswordDto) {
@@ -176,7 +177,7 @@ export async function resetPassword(dto: ResetPasswordDto) {
     data: { passwordHash },
   });
 
-  return { message: "Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại." };
+  return { success: true, message: "Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại." };
 }
 
 export async function changePassword(
